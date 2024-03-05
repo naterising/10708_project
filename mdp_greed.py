@@ -1,6 +1,7 @@
 import csv
+import itertools
 import sys
-from reward import reward as score
+from util import score, scoring_choice_generator
 
 # gamma is the discount factor
 if len(sys.argv) > 1:
@@ -52,15 +53,35 @@ class MarkovDecisionProcess:
         # initialize gamma
         self.gamma = gamma
 
+    def is_rolled_state(self, state):
+        """Returns True if the state is after getting a roll"""
+        return len(state[1]) > 0
+    def is_keep_state(self, state):
+        """Returns True if the state is before deciding to roll or pass"""
+        return len(state[1]) == 0
+
+    def is_score_action(self, action):
+        """Returns True if the action is a scoring action ie. a non-empty set"""
+        return isinstance(action, set) and action
+
+    def is_farkle(self, action):
+        """Returns True if the action is a farkle ie. an empty set"""
+        return isinstance(action, set) and not action
+
     def R(self, state, action):
         """return reward for this state."""
         """
         if state is (N, r), where n is number of dice and r is roll sequence
         -- if action is a score, return score(action)
-        -- if only action is farkle (r had empty scoring set), return -accrued points
+        -- if only action is farkle (r had empty scoring set), return -accrued points #TODO dummy value for this
         if state is (N, {}) return 0
         """
-        pass
+        if self.is_keep_state(state): return 0
+        elif self.is_rolled_state(state):
+            if self.is_score_action(action): return score(action)
+            elif self.is_farkle(action): return 0
+            else: raise Exception('Invalid action')
+        else: raise Exception('Invalid state')
 
     def actions(self, state):
         """return set of actions that can be performed in this state"""
@@ -68,7 +89,11 @@ class MarkovDecisionProcess:
         if state is (N, r), where n is number of dice and r is roll sequence, actions are score or farkle depending on roll sequence
         if state is (N, {}), actions are pass or roll
         """
-        pass
+        if self.is_rolled_state(state):
+            return scoring_choice_generator(state[1]) # if empty this is interpreted as a farkle
+        if self.is_keep_state(state):
+            return {'pass', 'roll'}
+
 
     def T(self, state, action):
         """for a state and an action, return a list of (probability, result-state) pairs."""
