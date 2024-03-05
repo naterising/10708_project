@@ -137,5 +137,5 @@ for roll, count in roll_dict.items():
     
 ##############################################
 
-df.to_parquet('dice_states_condensed.parquet', compression='snappy')
+df.to_csv('dice_states_condensed.csv')
         
