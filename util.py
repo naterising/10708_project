@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+import logging
+import numpy as np
 
-def reward(choice):
+logging.basicConfig(level=logging.INFO)
+
+
+def score(choice):
     """
     Calculates reward for some choice of dice to keep
 
@@ -169,157 +174,95 @@ def reward(choice):
         return 0
 
 
-def scoring_choice_generator(roll):
+def generate_choices():
+    logging.info('generating one scores')
+    roll_dict = {(1): np.array([1, 0, 0, 0, 0, 0]), (5): np.array([0, 0, 0, 0, 1, 0])}
 
+    logging.info("generating twos scores")
+    rolls = [(i, j) for i in range(1, 7) for j in range(1, 7)]
+    for roll in rolls:
+        roll = tuple(sorted(roll))
+        if score(roll):
+            counts = np.zeros(6)
+            for i in range(6):
+                counts[i] = np.count_nonzero([i+1 == x for x in roll])
+            roll_dict[roll] = counts
+    ############################################
+
+    logging.info("generating threes scores")
+    rolls = [(i, j, k) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7)]
+
+    for roll in rolls:
+        roll = tuple(sorted(roll))
+        if score(roll):
+            counts = np.zeros(6)
+            for i in range(6):
+                counts[i] = np.count_nonzero([i+1 == x for x in roll])
+            roll_dict[roll] = counts
+
+    ############################################
+
+    logging.info("generating fours scores")
+    rolls = [(i, j, k, l) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7)]
+
+    for roll in rolls:
+        roll = tuple(sorted(roll))
+        if score(roll):
+            counts = np.zeros(6)
+            for i in range(6):
+                counts[i] = np.count_nonzero([i+1 == x for x in roll])
+            roll_dict[roll] = counts
+
+    ############################################
+
+    logging.info("generating fives scores")
+    rolls = [(i, j, k, l, m) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for m
+             in
+             range(1, 7)]
+
+    for roll in rolls:
+        roll = tuple(sorted(roll))
+        if score(roll):
+            counts = np.zeros(6)
+            for i in range(6):
+                counts[i] = np.count_nonzero([i+1 == x for x in roll])
+            roll_dict[roll] = counts
+
+    ############################################
+
+    logging.info("generating sixes scores")
+    rolls = [(i, j, k, l, m, n) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for
+             m in
+             range(1, 7) for n in range(1, 7)]
+
+    for roll in rolls:
+        roll = tuple(sorted(roll))
+        if score(roll):
+            counts = np.zeros(6)
+            for i in range(6):
+                counts[i] = np.count_nonzero([i+1 == x for x in roll])
+            roll_dict[roll] = counts
+    return roll_dict
+
+
+POSSIBLE_CHOICES_COUNTS = generate_choices()
+
+def scoring_choice_generator(roll):
     allowed_entries = {1, 2, 3, 4, 5, 6}
     assert all(element in allowed_entries for element in roll)
 
     # sort the list
     roll = sorted(roll)
+
+    # count occurrence of 1-6
+    roll_counts = np.zeros(6)
+    for i in range(6):
+        roll_counts[i] = np.count_nonzero([i+1 == x for x in roll])
     choices = []
-
-    # use this to find subsequence
-    issubseq = lambda x, y: all(i in y for i in x) and len(x) == len([i in y for i in x])
-
-    if issubseq([1], roll):
-        choices.append([1])
-
-    if issubseq([5], roll):
-        choices.append([5])
-
-    if issubseq([1, 5], roll):
-        choices.append([1, 5])
-
-    if issubseq([1, 1], roll):
-        choices.append([1, 1])
-
-    if issubseq([5, 5], roll):
-        choices.append([5, 5])
-
-    if issubseq([1, 1, 1], roll):
-        choices.append([1, 1, 1])
-
-    if issubseq([2, 2, 2], roll):
-        choices.append([2, 2, 2])
-
-    if issubseq([3, 3, 3], roll):
-        choices.append([3, 3, 3])
-
-    if issubseq([4, 4, 4], roll):
-        choices.append([4, 4, 4])
-
-    if issubseq([5, 5, 5], roll):
-        choices.append([5, 5, 5])
-
-    if issubseq([6, 6, 6], roll):
-        choices.append([6, 6, 6])
-
-    if issubseq([1, 1, 5], roll):
-        choices.append([1, 1, 5])
-
-    if issubseq([1, 5, 5], roll):
-        choices.append([1, 5, 5])
-
-    if issubseq([1, 1, 1, 1], roll):
-        choices.append([1, 1, 1, 1])
-
-    if issubseq([2, 2, 2, 2], roll):
-        choices.append([2, 2, 2, 2])
-
-    if issubseq([3, 3, 3, 3], roll):
-        choices.append([3, 3, 3, 3])
-
-    if issubseq([4, 4, 4, 4], roll):
-        choices.append([4, 4, 4, 4])
-
-    if issubseq([5, 5, 5, 5], roll):
-        choices.append([5, 5, 5, 5])
-
-    if issubseq([6, 6, 6, 6], roll):
-        choices.append([6, 6, 6, 6])
-
-    if issubseq([1, 1, 1, 5], roll):
-        choices.append([1, 1, 1, 5])
-
-    if issubseq([1, 1, 5, 5], roll):
-        choices.append([1, 1, 5, 5])
-
-    if issubseq([1, 5, 5, 5], roll):
-        choices.append([1, 5, 5, 5])
-
-    if issubseq([1, 1, 1, 1, 1], roll):
-        choices.append([1, 1, 1, 1, 1])
-
-    if issubseq([2, 2, 2, 2, 2], roll):
-        choices.append([2, 2, 2, 2, 2])
-
-    if issubseq([3, 3, 3, 3, 3], roll):
-        choices.append([3, 3, 3, 3, 3])
-
-    if issubseq([4, 4, 4, 4, 4], roll):
-        choices.append([4, 4, 4, 4, 4])
-
-    if issubseq([5, 5, 5, 5, 5], roll):
-        choices.append([5, 5, 5, 5, 5])
-
-    if issubseq([6, 6, 6, 6, 6], roll):
-        choices.append([6, 6, 6, 6, 6])
-
-    if issubseq([1, 1, 1, 1, 5], roll):
-        choices.append([1, 1, 1, 1, 5])
-
-    if issubseq([1, 1, 1, 5, 5], roll):
-        choices.append([1, 1, 1, 5, 5])
-
-    if issubseq([1, 1, 5, 5, 5], roll):
-        choices.append([1, 1, 5, 5, 5])
-
-    if issubseq([1, 5, 5, 5, 5], roll):
-        choices.append([1, 5, 5, 5, 5])
-
-    if issubseq([1, 1, 1, 1, 1, 1], roll):
-        choices.append([1, 1, 1, 1, 1, 1])
-
-    if issubseq([2, 2, 2, 2, 2, 2], roll):
-        choices.append([2, 2, 2, 2, 2, 2])
-
-    if issubseq([3, 3, 3, 3, 3, 3], roll):
-        choices.append([3, 3, 3, 3, 3, 3])
-
-    if issubseq([4, 4, 4, 4, 4, 4], roll):
-        choices.append([4, 4, 4, 4, 4, 4])
-
-    if issubseq([5, 5, 5, 5, 5, 5], roll):
-        choices.append([5, 5, 5, 5, 5, 5])
-
-    if issubseq([6, 6, 6, 6, 6, 6], roll):
-        choices.append([6, 6, 6, 6, 6, 6])
-
-    if issubseq([1, 1, 1, 1, 1, 5], roll):
-        choices.append([1, 1, 1, 1, 1, 5])
-
-    if issubseq([1, 1, 1, 1, 5, 5], roll):
-        choices.append([1, 1, 1, 1, 5, 5])
-
-    if issubseq([1, 1, 1, 5, 5, 5], roll):
-        choices.append([1, 1, 1, 5, 5, 5])
-
-    if issubseq([1, 1, 5, 5, 5, 5], roll):
-        choices.append([1, 1, 5, 5, 5, 5])
-
-    if issubseq([1, 5, 5, 5, 5, 5], roll):
-        choices.append([1, 5, 5, 5, 5, 5])
-
-    # determine if the (sorted) list has 3 pairs
-    if len(roll) == 6:
-        num_pairs = 0
-        for i in range(5):
-            if roll[i] == roll[i + 1] and i % 2 == 0:
-                num_pairs += 1
-
-        if num_pairs == 3:
-            choices.append(roll)
+    logging.debug(f"roll counts: {roll_counts}")
+    for choice, counts in POSSIBLE_CHOICES_COUNTS.items():
+        logging.debug(f"choice: {choice}, counts: {counts}")
+        if np.all((roll_counts - counts) >= 0):
+            choices.append(choice)
 
     return choices
-
-
