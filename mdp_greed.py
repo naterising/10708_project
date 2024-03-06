@@ -143,8 +143,8 @@ def value_iteration(mdp, log_iters = 50):
             # Bellman update, update the utility values
             logging.debug(f's = {s}')
             for a in actions(s):
-                logging.debug(f"\ta = {a} T(s,a) = {T(s,a)}")
-                logging.debug(f"\tr = {R(s,a)}")
+                logging.debug(f"\t\ta = {a} T(s,a) = {T(s,a)}")
+                logging.debug(f"\t\tr = {R(s,a)}")
             V1[s] = max([sum([p * (R(s, a) + gamma * V[s1]) for (p, s1) in T(s, a)]) for a in actions(s)])
             # calculate maximum difference in value
             delta = max(delta, abs(V1[s] - V[s]))

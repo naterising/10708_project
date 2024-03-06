@@ -5,6 +5,14 @@ import numpy as np
 logging.basicConfig(level=logging.INFO)
 
 def generate_states():
+    """
+    Generates all possible states
+
+    Output: set of all possible states ie. {(6, ()), (3, (1, 4, 5)), (0, ())...}
+
+
+    """
+
     logging.info('Generating states...')
     states = {(0, tuple([]))}
 
@@ -209,6 +217,14 @@ def score(choice):
 
 
 def generate_choices():
+    """
+    Generates all possible scoring dice and their corresponding counts for each possible value a die can have
+
+    Output: dictionary mapping scoring dice to their counts ie. {(1, 1): (1,0,0,0,0,0), (1, 1, 5, 5): (2,0,0,0,2,0)...}
+    the counts are a vector where each entry is how many times its index appeared in the roll
+
+    """
+
     logging.info('Generating choices...')
     roll_dict = {tuple([1]): np.array([1, 0, 0, 0, 0, 0]), tuple([5]): np.array([0, 0, 0, 0, 1, 0])}
 
@@ -277,6 +293,19 @@ def generate_choices():
 POSSIBLE_CHOICES_COUNTS = generate_choices()
 
 def scoring_choice_generator(roll):
+    """
+    Calculates possible scoring choices for a roll
+
+    Input: list of numbers representing the roll
+        - cannot be of length 0
+        - cannot be of length greater than 6
+        - each member of the list must be in {1,2,3,4,5,6}
+
+    Output: list of scoring choices. if no valid choices then return a list containing empty list (the only option is a farkle)
+
+
+    """
+
     allowed_entries = {1, 2, 3, 4, 5, 6}
     assert all(element in allowed_entries for element in roll)
 
