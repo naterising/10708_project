@@ -5,8 +5,13 @@ import sys
 import pandas
 from util import score, scoring_choice_generator, generate_states
 
+# init logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter( '%(levelname)s:%(module)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 # gamma is the discount factor
 if len(sys.argv) > 1:
@@ -193,11 +198,10 @@ mdp = MarkovDecisionProcess(transition=Transitions, reward=Reward)
 
 # call value iteration
 V = value_iteration(mdp)
-print('State - Value')
 for s in V:
     print(s, ' - ', V[s])
 pi = best_policy(mdp, V)
-print('\nOptimal policy is \nState - Action')
+logger.info("Finished value iteration. Saving policy...")
 with open('data/policy.txt', 'w') as f:
     for s in pi:
         f.write(f"{s} - {pi[s]}\n")

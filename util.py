@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 import logging
+import sys
 import numpy as np
 
+# logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter( '%(levelname)s:%(module)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 def generate_states():
     """
@@ -14,7 +20,7 @@ def generate_states():
 
     """
 
-    logger.info('Generating states...')
+    logger.info("Generating states...")
     states = {(0, tuple([]))}
 
     # add keep states where you decide to roll or pass
@@ -318,9 +324,9 @@ def scoring_choice_generator(roll):
     for i in range(6):
         roll_counts[i] = np.count_nonzero([i+1 == x for x in roll])
     choices = []
-    # logger.debug(f"roll counts: {roll_counts}")
+    # logging.debug(f"roll counts: {roll_counts}")
     for choice, counts in POSSIBLE_CHOICES_COUNTS.items():
-        # logger.debug(f"choice: {choice}, counts: {counts}")
+        # logging.debug(f"choice: {choice}, counts: {counts}")
         if np.all((roll_counts - counts) >= 0):
             choices.append(choice)
 
