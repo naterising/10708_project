@@ -198,10 +198,12 @@ mdp = MarkovDecisionProcess(transition=Transitions, reward=Reward)
 
 # call value iteration
 V = value_iteration(mdp)
-for s in V:
-    print(s, ' - ', V[s])
+with open('data/value.txt', 'w') as f: #TODO: rewrite in pandas parlance
+    for s in V:
+        f.write(f"{s} - {V[s]}\n")
+
 pi = best_policy(mdp, V)
-logger.info("Finished value iteration. Saving policy...")
+logger.info("Finished value iteration. Saving policy...") #TODO: rewrite in pandas parlance
 with open('data/policy.txt', 'w') as f:
     for s in pi:
         f.write(f"{s} - {pi[s]}\n")
