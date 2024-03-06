@@ -198,5 +198,6 @@ for s in V:
     print(s, ' - ', V[s])
 pi = best_policy(mdp, V)
 print('\nOptimal policy is \nState - Action')
-for s in pi:
-    print(s, ' - ', pi[s])
+with open('data/policy.txt', 'w') as f:
+    for s in pi:
+        f.write(f"{s} - {pi[s]}\n")

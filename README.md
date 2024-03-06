@@ -12,6 +12,10 @@ Import the dice states:
   + contains MDP logic that runs value iteration and outputs optimal policy
 
 ## Example usage
-python3 mdp_greed.py > policy.txt
+`python mdp_greed.py`
+
+to specify gamma and epsilon do
+
+`python mdp_greed.py <gamma> <epsilon>`
 
 
