@@ -18,7 +18,7 @@ prob = (1/6)**N
 
 for d in range(1,7):
     
-    df.loc[len(df.index)] = [N, [d], prob] 
+    df.loc[len(df.index)] = [N, [d], prob]
     roll = []
     
 ############################################
@@ -137,5 +137,6 @@ for roll, count in roll_dict.items():
     
 ##############################################
 
-df.to_csv('dice_states_condensed.csv')
-        
+# df.to_csv('dice_states_condensed.csv')
+df.to_parquet('dice_states_condensed.parquet', compression='snappy')
+

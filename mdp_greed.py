@@ -1,7 +1,11 @@
 import csv
 import itertools
+import logging
 import sys
-from util import score, scoring_choice_generator
+import pandas
+from util import score, scoring_choice_generator, generate_states
+logging.basicConfig(level=logging.INFO)
+
 
 # gamma is the discount factor
 if len(sys.argv) > 1:
@@ -21,16 +25,7 @@ def read_file(transitions_filepath, rewards_filepath):
     Reward = {}
 
     # read transitions from file and store it to a variable
-    with open(transitions_filepath, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            if row[0] in Transitions:
-                if row[1] in Transitions[row[0]]:
-                    Transitions[row[0]][row[1]].append((float(row[3]), row[2]))
-                else:
-                    Transitions[row[0]][row[1]] = [(float(row[3]), row[2])]
-            else:
-                Transitions[row[0]] = {row[1]: [(float(row[3]), row[2])]}
+    Transitions = pandas.read_parquet(transitions_filepath)
 
     # read rewards file and save it to a variable
     with open(rewards_filepath, 'r') as csvfile:
@@ -45,7 +40,7 @@ class MarkovDecisionProcess:
 
     def __init__(self, transition={}, reward={}, gamma=.9):
         # collect all nodes from the transition models
-        self.states = transition.keys()
+        self.states = generate_states()
         # initialize transition
         self.transition = transition
         # initialize reward
@@ -62,11 +57,17 @@ class MarkovDecisionProcess:
 
     def is_score_action(self, action):
         """Returns True if the action is a scoring action ie. a non-empty set"""
-        return isinstance(action, set) and action
+        return isinstance(action, (list, tuple)) and len(action) > 0
+
+    def is_roll_action(self, action):
+        return isinstance(action, str) and action == 'roll'
+
+    def is_pass_action(self, action):
+        return isinstance(action, str) and action == 'pass'
 
     def is_farkle(self, action):
         """Returns True if the action is a farkle ie. an empty set"""
-        return isinstance(action, set) and not action
+        return isinstance(action, (list, tuple)) and len(action) == 0
 
     def R(self, state, action):
         """return reward for this state."""
@@ -90,8 +91,10 @@ class MarkovDecisionProcess:
         if state is (N, {}), actions are pass or roll
         """
         if self.is_rolled_state(state):
-            return scoring_choice_generator(state[1]) # if empty this is interpreted as a farkle
+            return scoring_choice_generator(state[1]) # returns empty list if farkle
         if self.is_keep_state(state):
+            if state[0] == 0: # used up all dice
+                return {'pass'}
             return {'pass', 'roll'}
 
 
@@ -105,10 +108,21 @@ class MarkovDecisionProcess:
         -- if action is roll, next state is set of (N, r) with precomputed probabilities
         -- if action is pass, next state is (6, {}) 
         """
-        pass
+        if self.is_rolled_state(state):
+            if self.is_score_action(action):
+                return [(1, (state[0] - len(action),tuple([])))]
+            if self.is_farkle(action):
+                return [(1, (6, tuple([])))]
+        if self.is_keep_state(state):
+            if self.is_roll_action(action):
+                tp = self.transition[self.transition.N == state[0]] # find all possible rolls of length N
+                next_states = list(zip(tp.N, tp.roll.apply(tuple)))
+                return list(zip(tp.p, next_states)) # return each possible roll of N dice and their probability of occurring
+            if self.is_pass_action(action):
+                return [(1, (6, tuple([])))]
 
 
-def value_iteration(mdp):
+def value_iteration(mdp, log_iters = 50):
     """
     Solving the MDP by value iteration.
     returns utility values for states after convergence
@@ -120,15 +134,24 @@ def value_iteration(mdp):
 
     # initialize value of all the states to 0 (this is k=0 case)
     V1 = {s: 0 for s in states}
+    logging.info("Init values...")
+    cnt = 0
     while True:
         V = V1.copy()
         delta = 0
         for s in states:
             # Bellman update, update the utility values
+            logging.debug(f's = {s}')
+            for a in actions(s):
+                logging.debug(f"\ta = {a} T(s,a) = {T(s,a)}")
+                logging.debug(f"\tr = {R(s,a)}")
             V1[s] = max([sum([p * (R(s, a) + gamma * V[s1]) for (p, s1) in T(s, a)]) for a in actions(s)])
             # calculate maximum difference in value
             delta = max(delta, abs(V1[s] - V[s]))
 
+        cnt += 1
+        if cnt % log_iters == 0:
+            logging.info(f'completed {cnt} iterations. delta = {delta}')
         # check for convergence, if values converged then return V
         if delta < epsilon * (1 - gamma) / gamma:
             return V
@@ -153,7 +176,7 @@ def expected_utility(mdp, a, s, V):
     return sum([p * V[s1] for (p, s1) in mdp.T(s, a)])
 
 
-Transitions, Reward = read_file('data/transitions.csv', 'data/rewards.csv')
+Transitions, Reward = read_file('dice_states_condensed.parquet', 'data/rewards.csv')
 # Initialize the MarkovDecisionProcess object
 mdp = MarkovDecisionProcess(transition=Transitions, reward=Reward)
 
