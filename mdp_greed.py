@@ -4,8 +4,9 @@ import logging
 import sys
 import pandas
 from util import score, scoring_choice_generator, generate_states
-logging.basicConfig(level=logging.INFO)
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # gamma is the discount factor
 if len(sys.argv) > 1:
@@ -60,9 +61,11 @@ class MarkovDecisionProcess:
         return isinstance(action, (list, tuple)) and len(action) > 0
 
     def is_roll_action(self, action):
+        """Returns True if the action is roll"""
         return isinstance(action, str) and action == 'roll'
 
     def is_pass_action(self, action):
+        """Returns True if the action is pass"""
         return isinstance(action, str) and action == 'pass'
 
     def is_farkle(self, action):
@@ -91,7 +94,7 @@ class MarkovDecisionProcess:
         if state is (N, {}), actions are pass or roll
         """
         if self.is_rolled_state(state):
-            return scoring_choice_generator(state[1]) # returns empty list if farkle
+            return scoring_choice_generator(state[1]) # returns list containing empty list if farkle
         if self.is_keep_state(state):
             if state[0] == 0: # used up all dice
                 return {'pass'}
@@ -122,10 +125,14 @@ class MarkovDecisionProcess:
                 return [(1, (6, tuple([])))]
 
 
-def value_iteration(mdp, log_iters = 50):
+def value_iteration(mdp, log_iters = 5):
     """
     Solving the MDP by value iteration.
     returns utility values for states after convergence
+
+    Input: markov decision process model, number of iterations to log progress
+    Output: optimized value function
+
     """
     states = mdp.states
     actions = mdp.actions
@@ -134,24 +141,24 @@ def value_iteration(mdp, log_iters = 50):
 
     # initialize value of all the states to 0 (this is k=0 case)
     V1 = {s: 0 for s in states}
-    logging.info("Init values...")
+    logger.info("Init values...")
     cnt = 0
     while True:
         V = V1.copy()
         delta = 0
         for s in states:
             # Bellman update, update the utility values
-            logging.debug(f's = {s}')
+            logger.debug(f's = {s}')
             for a in actions(s):
-                logging.debug(f"\t\ta = {a} T(s,a) = {T(s,a)}")
-                logging.debug(f"\t\tr = {R(s,a)}")
+                logger.debug(f"\t\ta = {a} T(s,a) = {T(s,a)}")
+                logger.debug(f"\t\tr = {R(s,a)}")
             V1[s] = max([sum([p * (R(s, a) + gamma * V[s1]) for (p, s1) in T(s, a)]) for a in actions(s)])
             # calculate maximum difference in value
             delta = max(delta, abs(V1[s] - V[s]))
 
         cnt += 1
         if cnt % log_iters == 0:
-            logging.info(f'completed {cnt} iterations. delta = {delta}')
+            logger.info(f'completed {cnt} iterations. delta = {delta}')
         # check for convergence, if values converged then return V
         if delta < epsilon * (1 - gamma) / gamma:
             return V
@@ -161,6 +168,10 @@ def best_policy(mdp, V):
     """
     Given an MDP and a utility values V, determine the best policy as a mapping from state to action.
     returns policies which is dictionary of the form {state1: action1, state2: action2}
+
+    Input: markov decision process model, optimized value function
+    Output: the policy which maps each state to the best action
+
     """
     states = mdp.states
     actions = mdp.actions
@@ -176,7 +187,7 @@ def expected_utility(mdp, a, s, V):
     return sum([p * V[s1] for (p, s1) in mdp.T(s, a)])
 
 
-Transitions, Reward = read_file('dice_states_condensed.parquet', 'data/rewards.csv')
+Transitions, Reward = read_file('data/dice_states_condensed.parquet', 'data/rewards.csv') # reward is a dummy variable left over from previous code
 # Initialize the MarkovDecisionProcess object
 mdp = MarkovDecisionProcess(transition=Transitions, reward=Reward)
 
