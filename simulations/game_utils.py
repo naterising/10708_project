@@ -1,60 +1,11 @@
 # -*- coding: utf-8 -*-
-import logging
-import sys
-import numpy as np
+"""
+Utility functions to help with Greed simulation
+"""
 
-# logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter( '%(levelname)s:%(module)s:%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+from itertools import combinations
 
-def generate_states():
-    """
-    Generates all possible states
-
-    Output: set of all possible states ie. {(6, ()), (3, (1, 4, 5)), (0, ())...}
-
-
-    """
-
-    logger.info("Generating states...")
-    states = {(0, tuple([]))}
-
-    # add keep states where you decide to roll or pass
-    for i in range(1,7):
-        states.add((i, tuple([])))
-
-    # add roll states where you decide to score or you have to farkle
-    ## N = 1
-    for i in range(1,7):
-        states.add((1, tuple([i])))
-
-    ## N = 2
-    [states.add((2, (i, j))) for i in range(1, 7) for j in range(1, 7)]
-
-    ## N = 3
-    [states.add((3, (i, j, k))) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7)]
-
-    ## N = 4
-    [states.add((4, (i, j, k, l))) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7)]
-
-    ## N = 5
-    [states.add((5, (i, j, k, l, m))) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for m
-     in
-     range(1, 7)]
-
-    ## N = 6
-    [states.add((6, (i, j, k, l, m, n))) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for
-     m in
-     range(1, 7) for n in range(1, 7)]
-
-    return states
-
-
-def score(choice):
+def get_score(choice):
     """
     Calculates reward for some choice of dice to keep
 
@@ -329,115 +280,49 @@ def score(choice):
 
     else:
         return 0
-
-
-def generate_choices():
+    
+    
+def get_possible_choices(roll):
     """
-    Generates all possible scoring dice and their corresponding counts for each possible value a die can have
-
-    Output: dictionary mapping scoring dice to their counts ie. {(1, 1): (1,0,0,0,0,0), (1, 1, 5, 5): (2,0,0,0,2,0)...}
-    the counts are a vector where each entry is how many times its index appeared in the roll
-
+    Enumerates all possible choices that a player could pick on a given roll.
+    Returns a list of tuples that define a roll choice
     """
+    
+    all_combinations = set()
+    
+    for i in range(1,len(roll)+1):
+        # Get all possible combinations of length i
+        all_combinations = all_combinations.union(set(combinations(roll, i)))
 
-    logger.info('Generating choices...')
-    roll_dict = {tuple([1]): np.array([1, 0, 0, 0, 0, 0]), tuple([5]): np.array([0, 0, 0, 0, 1, 0])}
+    return list(all_combinations)
 
-    rolls = [(i, j) for i in range(1, 7) for j in range(1, 7)]
-    for roll in rolls:
-        roll = tuple(sorted(roll))
-        if score(roll):
-            counts = np.zeros(6)
-            for i in range(6):
-                counts[i] = np.count_nonzero([i+1 == x for x in roll])
-            roll_dict[roll] = counts
-    ############################################
-
-    rolls = [(i, j, k) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7)]
-
-    for roll in rolls:
-        roll = tuple(sorted(roll))
-        if score(roll):
-            counts = np.zeros(6)
-            for i in range(6):
-                counts[i] = np.count_nonzero([i+1 == x for x in roll])
-            roll_dict[roll] = counts
-
-    ############################################
-
-    rolls = [(i, j, k, l) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7)]
-
-    for roll in rolls:
-        roll = tuple(sorted(roll))
-        if score(roll):
-            counts = np.zeros(6)
-            for i in range(6):
-                counts[i] = np.count_nonzero([i+1 == x for x in roll])
-            roll_dict[roll] = counts
-
-    ############################################
-
-    rolls = [(i, j, k, l, m) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for m
-             in
-             range(1, 7)]
-
-    for roll in rolls:
-        roll = tuple(sorted(roll))
-        if score(roll):
-            counts = np.zeros(6)
-            for i in range(6):
-                counts[i] = np.count_nonzero([i+1 == x for x in roll])
-            roll_dict[roll] = counts
-
-    ############################################
-
-    rolls = [(i, j, k, l, m, n) for i in range(1, 7) for j in range(1, 7) for k in range(1, 7) for l in range(1, 7) for
-             m in
-             range(1, 7) for n in range(1, 7)]
-
-    for roll in rolls:
-        roll = tuple(sorted(roll))
-        if score(roll):
-            counts = np.zeros(6)
-            for i in range(6):
-                counts[i] = np.count_nonzero([i+1 == x for x in roll])
-            roll_dict[roll] = counts
-    return roll_dict
-
-
-POSSIBLE_CHOICES_COUNTS = generate_choices()
-
-def scoring_choice_generator(roll):
+def get_highest_choice(all_choices):
     """
-    Calculates possible scoring choices for a roll
-
-    Input: list of numbers representing the roll
-        - cannot be of length 0
-        - cannot be of length greater than 6
-        - each member of the list must be in {1,2,3,4,5,6}
-
-    Output: list of scoring choices. if no valid choices then return a list containing empty list (the only option is a farkle)
-
-
+    Given a list of every possible choice, returns a tuple (choice, score)
+    that gives the highest possible score. If mutiple rolls give that score, 
+    the one that uses the least amount of dice is used. 
+    
+    Returns [] if no scoring rolls are possible
     """
-
-    allowed_entries = {1, 2, 3, 4, 5, 6}
-    assert all(element in allowed_entries for element in roll)
-
-    # sort the list
-    roll = sorted(roll)
-
-    # count occurrence of 1-6
-    roll_counts = np.zeros(6)
-    for i in range(6):
-        roll_counts[i] = np.count_nonzero([i+1 == x for x in roll])
-    choices = []
-    # logging.debug(f"roll counts: {roll_counts}")
-    for choice, counts in POSSIBLE_CHOICES_COUNTS.items():
-        # logging.debug(f"choice: {choice}, counts: {counts}")
-        if np.all((roll_counts - counts) >= 0):
-            choices.append(choice)
-
-    if len(choices) == 0: # farkle
-        choices.append(tuple([]))
-    return choices
+    
+    highest_choice = []
+    highest_score = 0
+    
+    for choice in all_choices:
+        score = get_score(list(choice))
+        
+        if score > highest_score or (score == highest_score and len(choice) < len(highest_choice)):
+            highest_score = score
+            highest_choice = choice
+            
+    if highest_score > 0:
+        best = list(highest_choice)
+    
+    else:
+        best = []
+        
+    return best
+        
+    
+            
+        
