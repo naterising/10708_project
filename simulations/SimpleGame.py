@@ -7,14 +7,19 @@ Implements a simplified game class for running a Greed simulation:
 
 """
 import random
+import numpy as np
 import game_utils
+import logging
+import os
+
 
 WIN_THRESHOLD = 10000
+SCORE_HISTORY_LENGTH = 1000
 
 class SimpleGame:
     
     
-    def __init__(self, players):
+    def __init__(self, players, log_file_path, score_data_path):
         """
         Each game 
         
@@ -27,13 +32,29 @@ class SimpleGame:
         self.players = players
         self.scores = [0 for i in range(len(players))]
         self.current_roll = [] # initially no dice have been rolled
-        self.num_available_dice = 6
-        self.accrued_score = 0
+        self.num_available_dice = 6 # start condition for simple gamme
+        self.accrued_score = 0 # start condition for simple game
+        
+        
+        # initialize data structures that track scores over time
+        self.full_score_history = np.zeros((SCORE_HISTORY_LENGTH,len(players))) 
+        self.score_data_path = score_data_path
+        
+        logging.basicConfig(filename=log_file_path, filemode ="w",format='%(message)s')
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        
+        #file_handler = logging.FileHandler(log_file_path)
+       # file_handler.setLevel(logging.INFO)
+        #self.logger.addHandler(file_handler)
+    
+        
+
         
     def pack_game_state(self):
         return (self.scores, self.num_available_dice, self.accrued_score)
     
-    def roll_dice(n):
+    def roll_dice(self, n):
         """
         Rolls n dice
         """
@@ -56,10 +77,12 @@ class SimpleGame:
         Returns how many points the player got.
         Does NOT update game state
         """
+        self.logger.info("Player " + str(player.player_num) + " taking a turn...")
+        
         
         # in the simple version, each player starts with 0 pts and 6 dice
-        self.num_available_dice = 6
-        self.accrued_score = 0
+        player.num_available_dice = self.num_available_dice
+        player.accrued_score = self.accrued_score
         
         # update player game state
         player.update_game_state(self.pack_game_state())
@@ -69,31 +92,46 @@ class SimpleGame:
         busted = False
         
         while(keep_rolling):
+            self.logger.info("\tCurrent state: "+str(player.num_available_dice) + " dice available to roll, " + str(player.accrued_score) + " accrued points")
             keep_rolling = player.pass_or_roll()
             
+            
             if keep_rolling: # player wants to roll
+                self.logger.info("\tplayer wants to roll...")
             
                 # roll the dice
-                roll = self.roll_dice(self.num_available_dice)
+                roll = self.roll_dice(player.num_available_dice)
                 player.current_roll = roll
+                self.logger.info("\t\troll: [%s]", ','.join(map(str, roll)))
+                
                 
                 # player makes choice on the dice
                 choice = player.choose_dice()
+                self.logger.info("\t\tplayer choice: [%s]", ','.join(map(str, choice)))
+
                 
                 if choice == []:
                     busted = True
                     keep_rolling = False
+                    self.logger.info("\t\t\tplayer busted! Turn over...")
                 
                 # process the player's choice. 
                 # Update accrued pts, num_available_dice
-                player.accrued_score += game_utils.get_score(choice)
+                choice_score = game_utils.get_score(choice)
+                self.logger.info("\t\t\tplayer accrued " + str(choice_score) + " points from choice..." )
+                
+                
+                player.accrued_score += choice_score
                 player.num_available_dice = player.num_available_dice - len(choice)
                 if player.num_available_dice == 0:
                     player.num_available_dice = 6
+                    
+            else:
+                self.logger.info("\tplayer wants to pass. Turn over...")
         
         
         # after the player has decided to stop playing, (or has busted), return
-        # their score
+        # their score. 
         if busted:
             return 0
         
@@ -108,17 +146,23 @@ class SimpleGame:
         Players play turns interatively until one has 
 
         """
+        
+        self.logger.info("--------------------------------------------------")
+        self.logger.info("Starting Game...")
+        
         current_player = 0 # start with first player
         keep_playing = True
+        round_num = 0
         
         
         while (keep_playing):
             
             # the current player plays their turn
-            score = self.play_turn(self.players(current_player))
+            score = self.play_turn(self.players[current_player])
             
             # updates game state after running the turn
             self.scores[current_player] += score
+            self.full_score_history[round_num,current_player] = self.scores[current_player]
             
             # check to see if a player has won
             if self.scores[current_player] > WIN_THRESHOLD:
@@ -128,10 +172,15 @@ class SimpleGame:
                 current_player += 1
                 if current_player == len(self.players):
                     current_player = 0
+                    round_num += 1
                     
                     
+        # save results
+        final_scores = self.full_score_history[:round_num+1]
+        headers = ["Player " + str(i) for i in range(len(self.players))]
+        np.savetxt(self.score_data_path,final_scores,delimiter=',',header=','.join(map(str, headers)),comments="",fmt='%.{}f'.format(0))
+        logging.shutdown()
         
-        # TODO: report results/winner
         
         
         

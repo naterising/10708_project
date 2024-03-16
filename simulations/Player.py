@@ -11,14 +11,13 @@ import game_utils
 class Player:
     
     
-    def __init__(self,game,player_num):
+    def __init__(self,player_num):
         """
         Initiailize game, passing in @param game to give player access to game state
         """
         self.num_available_dice = 0
         self.current_roll = []
         self.accrued_score = 0
-        self.game = game
         
         # each player gets a player number so they can reference other player's scores
         self.player_num = player_num 
