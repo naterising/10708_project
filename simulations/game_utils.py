@@ -208,13 +208,13 @@ def get_score(choice):
     elif choice == [2,2,2,5]:
         return 250
     
-    elif choice == [2,2,2,1]:
+    elif choice == [1,2,2,2]:
         return 300
     
-    elif choice == [2,2,2,1,1]:
+    elif choice == [1,1,2,2,2]:
         return 400
     
-    elif choice == [2,2,2,1,5]:
+    elif choice == [1,2,2,2,5]:
         return 350
     
     elif choice == [2,2,2,5,5]:
@@ -223,13 +223,13 @@ def get_score(choice):
     elif choice == [3,3,3,5]:
         return 350
     
-    elif choice == [3,3,3,1]:
+    elif choice == [1,3,3,3]:
         return 400
     
-    elif choice == [3,3,3,1,1]:
+    elif choice == [1,1,3,3,3]:
         return 500
     
-    elif choice == [3,3,3,1,5]:
+    elif choice == [1,3,3,3,5]:
         return 450
     
     elif choice == [3,3,3,5,5]:
@@ -238,31 +238,31 @@ def get_score(choice):
     elif choice == [4,4,4,5]:
         return 450
     
-    elif choice == [4,4,4,1]:
+    elif choice == [1,4,4,4]:
         return 500
     
-    elif choice == [4,4,4,1,1]:
+    elif choice == [1,1,4,4,4]:
         return 600
     
-    elif choice == [4,4,4,1,5]:
+    elif choice == [1,4,4,4,5]:
         return 550
     
     elif choice == [4,4,4,5,5]:
         return 500
     
-    elif choice == [6,6,6,5]:
+    elif choice == [5,6,6,6]:
         return 650
     
-    elif choice == [6,6,6,1]:
+    elif choice == [1,6,6,6]:
         return 700
     
-    elif choice == [6,6,6,1,1]:
+    elif choice == [1,1,6,6,6]:
         return 800
     
-    elif choice == [6,6,6,1,5]:
+    elif choice == [1,5,6,6,6]:
         return 750
     
-    elif choice == [6,6,6,5,5]:
+    elif choice == [5,5,6,6,6]:
         return 700
 
     # if control reaches here the choice is either a bust or 3 pairs

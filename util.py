@@ -68,7 +68,7 @@ def score(choice):
 
     """
 
-    assert len(choice) > 0
+    assert len(choice) > -1
     assert len(choice) < 7
 
     allowed_entries = set([1, 2, 3, 4, 5, 6])
@@ -205,6 +205,114 @@ def score(choice):
 
     elif choice == [1, 5, 5, 5, 5, 5]:
         return 2100
+    
+    # check for double triples
+    elif choice == [1,1,1,2,2,2]:
+        return 1200
+    
+    elif choice == [1,1,1,3,3,3]:
+        return 1300
+    
+    elif choice == [1,1,1,4,4,4]:
+        return 1400
+    
+    elif choice == [1,1,1,5,5,5]:
+        return 1500
+    
+    elif choice == [1,1,1,6,6,6]:
+        return 1600
+    
+    elif choice == [2,2,2,3,3,3]:
+        return 500
+    
+    elif choice == [2,2,2,4,4,4]:
+        return 600
+    
+    elif choice == [2,2,2,5,5,5]:
+        return 700
+    
+    elif choice == [2,2,2,6,6,6]:
+        return 800
+    
+    elif choice == [3,3,3,4,4,4]:
+        return 700
+    
+    elif choice == [3,3,3,5,5,5]:
+        return 800
+    
+    elif choice == [3,3,3,6,6,6]:
+        return 900
+    
+    elif choice == [4,4,4,5,5,5]:
+        return 900
+
+    elif choice == [4,4,4,6,6,6]:
+        return 1000
+    
+    elif choice == [5,5,5,6,6,6]:
+        return 1100
+    
+    
+    # now, check for 3s/4s/5s of a kind + excess fives of ones
+    elif choice == [2,2,2,5]:
+        return 250
+    
+    elif choice == [1,2,2,2]:
+        return 300
+    
+    elif choice == [1,1,2,2,2]:
+        return 400
+    
+    elif choice == [1,2,2,2,5]:
+        return 350
+    
+    elif choice == [2,2,2,5,5]:
+        return 300
+    
+    elif choice == [3,3,3,5]:
+        return 350
+    
+    elif choice == [1,3,3,3]:
+        return 400
+    
+    elif choice == [1,1,3,3,3]:
+        return 500
+    
+    elif choice == [1,3,3,3,5]:
+        return 450
+    
+    elif choice == [3,3,3,5,5]:
+        return 400
+    
+    elif choice == [4,4,4,5]:
+        return 450
+    
+    elif choice == [1,4,4,4]:
+        return 500
+    
+    elif choice == [1,1,4,4,4]:
+        return 600
+    
+    elif choice == [1,4,4,4,5]:
+        return 550
+    
+    elif choice == [4,4,4,5,5]:
+        return 500
+    
+    elif choice == [5,6,6,6]:
+        return 650
+    
+    elif choice == [1,6,6,6]:
+        return 700
+    
+    elif choice == [1,1,6,6,6]:
+        return 800
+    
+    elif choice == [1,5,6,6,6]:
+        return 750
+    
+    elif choice == [5,5,6,6,6]:
+        return 700
 
     # if control reaches here the choice is either a bust or 3 pairs
     if len(choice) != 6: return 0
