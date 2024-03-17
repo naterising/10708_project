@@ -5,13 +5,14 @@ General class defining a player object.
 Any player that plays the game will have the same constructor and must implement
 two methods that determine their strategy 
 """
+import pickle
 
 import game_utils
 
 class Player:
     
     
-    def __init__(self,player_num):
+    def __init__(self,player_num, policy_filepath):
         """
         Initiailize game, passing in @param game to give player access to game state
         """
@@ -25,6 +26,10 @@ class Player:
         
         # each player will get updates on the state of the game before they start their turn
         self.state = ()
+
+        self.policy = {}
+        with open(policy_filepath, 'rb') as f:
+            self.policy = pickle.load(f)
         
         
         
@@ -49,15 +54,16 @@ class Player:
         Returns: True if player wants to roll again
         Returns: False if player wants to end their turn
         """
-        
+
+        return self.policy[(self.num_available_dice, ())] == 'roll'
         
         # very basic implementation, only keep rolling if you have more than
         # two dice available to roll
-        if self.num_available_dice > 2:
-            return True
-        
-        else:
-            return False
+        # if self.num_available_dice > 2:
+        #     return True
+        #
+        # else:
+        #     return False
     
     
     def choose_dice(self):
@@ -65,12 +71,13 @@ class Player:
         Player inspects the current roll.
         If the player has no scoring choices, return [].
         """
-        
-        # very basic greedy strategy, returns the highest possible score 
+        choice = self.policy[(self.num_available_dice, self.current_roll)]
+        return choice
+        # very basic greedy strategy, returns the highest possible score
         # for the current roll
         
-        choices = game_utils.get_possible_choices(self.current_roll)
-        best_choice = game_utils.get_highest_choice(choices)
-        
-        return best_choice
+        # choices = game_utils.get_possible_choices(self.current_roll)
+        # best_choice = game_utils.get_highest_choice(choices)
+        #
+        # return best_choice
         

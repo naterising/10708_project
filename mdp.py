@@ -1,6 +1,7 @@
 import csv
 import itertools
 import logging
+import pickle
 import sys
 import pandas
 from utils import score, scoring_choice_generator, generate_states
@@ -204,7 +205,7 @@ mdp = MarkovDecisionProcess(transition=Transitions, reward=Reward)
 
 # call value iteration
 V = value_iteration(mdp)
-with open('data/value.txt', 'w') as f:  # TODO: rewrite in pandas parlance
+with open('data/policies/value gamma=0.9.txt', 'w') as f:  # TODO: rewrite in pandas parlance
     for s in V:
         f.write(f"{s} - {V[s]}\n")
 
@@ -213,3 +214,6 @@ logger.info("Finished value iteration. Saving policy...")  # TODO: rewrite in pa
 with open('data/policy.txt', 'w') as f:
     for s in pi:
         f.write(f"{s} - {pi[s]}\n")
+
+with open('data/policies/policy gamma=0.9.pkl', 'wb') as f:
+    pickle.dump(pi, f, pickle.HIGHEST_PROTOCOL)

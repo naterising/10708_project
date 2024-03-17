@@ -31,7 +31,7 @@ class SimpleGame:
         
         self.players = players
         self.scores = [0 for i in range(len(players))]
-        self.current_roll = [] # initially no dice have been rolled
+        self.current_roll = tuple([]) # initially no dice have been rolled
         self.num_available_dice = 6 # start condition for simple gamme
         self.accrued_score = 0 # start condition for simple game
         
@@ -64,7 +64,7 @@ class SimpleGame:
         for i in range(n):
             roll.append(random.choice(possible_values))
             
-        return sorted(roll)
+        return tuple(sorted(roll))
         
     def play_turn(self, player):
         """

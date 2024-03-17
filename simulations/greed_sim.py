@@ -7,8 +7,8 @@ from Player import Player
 from SimpleGame import SimpleGame
 
 # instantiate a list of players
-p0 = Player(0)
-p1 = Player(1)
+p0 = Player(0, policy_filepath='data/policies/policy gamma=0.9.pkl')
+p1 = Player(1, policy_filepath='data/policies/policy gamma=0.9.pkl')
 
 players = [p0,p1]
 
