@@ -5,13 +5,14 @@ General class defining a player object.
 Any player that plays the game will have the same constructor and must implement
 two methods that determine their strategy 
 """
-
+import pickle
+from Player import Player
 import game_utils
 
-class Player:
+class MDPPlayer(Player):
     
     
-    def __init__(self,player_num):
+    def __init__(self,player_num, policy_filepath):
         """
         Initiailize game, passing in @param game to give player access to game state
         """
@@ -25,21 +26,25 @@ class Player:
         
         # each player will get updates on the state of the game before they start their turn
         self.state = ()
+
+        self.policy = {}
+        with open(policy_filepath, 'rb') as f:
+            self.policy = pickle.load(f)
         
         
-        
-    def update_game_state(self,state):
-        """
-        Before a player plays their turn, the Game object will update their game
-        state by passing in the current state. This is a tuple that encodes:
+    # technically this can be deleted since inherits from Player
+    # def update_game_state(self,state):
+    #     """
+    #     Before a player plays their turn, the Game object will update their game
+    #     state by passing in the current state. This is a tuple that encodes:
             
-        (all player's scores, current roll, accrued pts)
+    #     (all player's scores, current roll, accrued pts)
         
-        """
+    #     """
         
-        self.all_scores = state[0]
-        self.num_available_dice = state[1]
-        self.accrued_score = state[2]
+    #     self.all_scores = state[0]
+    #     self.num_available_dice = state[1]
+    #     self.accrued_score = state[2]
         
     
     def pass_or_roll(self):
@@ -49,15 +54,9 @@ class Player:
         Returns: True if player wants to roll again
         Returns: False if player wants to end their turn
         """
+
+        return self.policy[(self.num_available_dice, ())] == 'roll'
         
-        
-        # very basic implementation, only keep rolling if you have more than
-        # two dice available to roll
-        if self.num_available_dice > 2:
-            return True
-        
-        else:
-            return False
     
     
     def choose_dice(self):
@@ -65,12 +64,7 @@ class Player:
         Player inspects the current roll.
         If the player has no scoring choices, return [].
         """
-        
-        # very basic greedy strategy, returns the highest possible score 
-        # for the current roll
-        
-        choices = game_utils.get_possible_choices(self.current_roll)
-        best_choice = game_utils.get_highest_choice(choices)
-        
-        return best_choice
+        choice = self.policy[(self.num_available_dice, self.current_roll)]
+        return choice
+
         

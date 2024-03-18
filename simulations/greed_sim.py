@@ -4,11 +4,12 @@ Script to run a round of Greed
 """
 
 from Player import Player
+from MDPPlayer import MDPPlayer
 from SimpleGame import SimpleGame
 
 # instantiate a list of players
-p0 = Player(0, policy_filepath='data/policies/policy gamma=0.9.pkl')
-p1 = Player(1, policy_filepath='data/policies/policy gamma=0.9.pkl')
+p0 = Player(0)
+p1 = MDPPlayer(1, policy_filepath='data/policies/policy gamma=0.9.pkl')
 
 players = [p0,p1]
 
