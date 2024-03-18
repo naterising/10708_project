@@ -116,6 +116,7 @@ class MarkovDecisionProcess:
         """
         if state is (N, r), where n is number of dice and r is roll sequence
         -- if action is score, next state is (N - k, {}), where k is number of chosen dice to score
+        *special case, if k == N, then set N = 6
         -- if action is farkle, next state is (6, {})
         if state is (N, {})
         -- if action is roll, next state is set of (N, r) with precomputed probabilities
@@ -123,6 +124,7 @@ class MarkovDecisionProcess:
         """
         if self.is_rolled_state(state):  # state is (N, r)
             if self.is_score_action(action):
+                if len(action) == 6: return [(1, (6, tuple([])))]
                 return [(1, (state[0] - len(action), tuple([])))]
             if self.is_farkle(action):
                 return [(1, (6, tuple([])))]
