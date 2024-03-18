@@ -40,14 +40,18 @@ class SimpleGame:
         self.full_score_history = np.zeros((SCORE_HISTORY_LENGTH,len(players))) 
         self.score_data_path = score_data_path
         
+        # ensure clean logging configuration
+        logging.shutdown()
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+            
+            
+        # setup log for game
         logging.basicConfig(filename=log_file_path, filemode ="w",format='%(message)s')
         self.logger = logging.getLogger()
+        print(self.logger)
         self.logger.setLevel(logging.INFO)
         
-        #file_handler = logging.FileHandler(log_file_path)
-       # file_handler.setLevel(logging.INFO)
-        #self.logger.addHandler(file_handler)
-    
         
 
         
@@ -138,7 +142,20 @@ class SimpleGame:
         else:
             return player.accrued_score
             
-        
+    def get_final_scores(self,all_scores):
+        """
+        Strip last row of scores array, and fill in any 0-values with value in 
+        previous row. Called at end of play_game() function
+        """
+                
+        num_rows = all_scores.shape[0]
+        final_row = all_scores[-1]
+                
+        for i in range(len(final_row)):
+            if final_row[i] == 0:
+                final_row[i] = all_scores[num_rows-2,i]
+            
+        return final_row
         
         
     def play_game(self):
@@ -179,7 +196,15 @@ class SimpleGame:
         final_scores = self.full_score_history[:round_num+1]
         headers = ["Player " + str(i) for i in range(len(self.players))]
         np.savetxt(self.score_data_path,final_scores,delimiter=',',header=','.join(map(str, headers)),comments="",fmt='%.{}f'.format(0))
-        logging.shutdown()
+    
+        
+        # return final scores
+        return self.get_final_scores(final_scores)
+    
+
+        
+        
+
         
         
         
