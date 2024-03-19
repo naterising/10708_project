@@ -7,8 +7,11 @@ from Player import Player
 from MDPPlayer import MDPPlayer
 from SimpleGame import SimpleGame
 from datetime import datetime
+import numpy as np
 
-NUM_ROUNDS = 3
+NUM_ROUNDS = 30
+avg_scores = np.zeros((1,2)) # 2 players
+p0_wins = 0
 
 for i in range(NUM_ROUNDS):
     # instantiate a list of players
@@ -28,4 +31,10 @@ for i in range(NUM_ROUNDS):
     # run the game
     final_scores = game.play_game()
     
-    print(final_scores)
+    avg_scores += final_scores
+    if final_scores[0] > final_scores[1]:
+        p0_wins += 1
+    
+print("Average scores, each player: "+str(avg_scores / NUM_ROUNDS))
+print("Player 0 wins: "+str(p0_wins))
+print("Player 1 wins: "+str(NUM_ROUNDS-p0_wins))

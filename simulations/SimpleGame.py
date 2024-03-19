@@ -49,7 +49,6 @@ class SimpleGame:
         # setup log for game
         logging.basicConfig(filename=log_file_path, filemode ="w",format='%(message)s')
         self.logger = logging.getLogger()
-        print(self.logger)
         self.logger.setLevel(logging.INFO)
         
         
