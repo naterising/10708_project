@@ -213,7 +213,7 @@ with open('data/policies/value gamma=0.9.txt', 'w') as f:  # TODO: rewrite in pa
 
 pi = best_policy(mdp, V)
 logger.info("Finished value iteration. Saving policy...")  # TODO: rewrite in pandas parlance
-with open('data/policy.txt', 'w') as f:
+with open('data/policies/policy gamma=0.9.txt', 'w') as f:
     for s in pi:
         f.write(f"{s} - {pi[s]}\n")
 
