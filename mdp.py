@@ -87,7 +87,10 @@ class MarkovDecisionProcess:
         if state is (N, {}) return 0
         """
         if self.is_keep_state(state):
-            return 0
+            if self.is_pass_action():
+                return -50
+            else:
+                return 0
         elif self.is_rolled_state(state):
             if self.is_score_action(action):
                 return score(action)
