@@ -87,7 +87,7 @@ class MarkovDecisionProcess:
         if state is (N, {}) return 0
         """
         if self.is_keep_state(state):
-            if self.is_pass_action():
+            if self.is_pass_action(action):
                 return -50
             else:
                 return 0
