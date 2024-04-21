@@ -28,9 +28,10 @@ class MDPPlayer(Player):
         self.state = ()
 
         self.policy = {}
+        self.value = {}
         with open(policy_filepath, 'rb') as f:
             self.policy = pickle.load(f)
-        
+
         
     # technically this can be deleted since inherits from Player
     # def update_game_state(self,state):
@@ -55,6 +56,7 @@ class MDPPlayer(Player):
         Returns: False if player wants to end their turn
         """
 
+        # very basic flip coin to pass or roll if state is (6,())
         return self.policy[(self.num_available_dice, ())] == 'roll'
         
     

@@ -16,7 +16,7 @@ p0_wins = 0
 for i in range(NUM_ROUNDS):
     # instantiate a list of players
     p0 = Player(0)
-    p1 = MDPPlayer(1, policy_filepath='../data/policies/policy gamma=0.9.pkl')
+    p1 = MDPPlayer(1, policy_filepath='data/policies/policy iteration/policy gamma=0.9 penalty = -10000 farkle penalty.pkl')
     
     players = [p0,p1]
     

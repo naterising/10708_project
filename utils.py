@@ -404,10 +404,7 @@ def generate_choices():
             roll_dict[roll] = counts
     return roll_dict
 
-
-POSSIBLE_CHOICES_COUNTS = generate_choices()
-
-def scoring_choice_generator(roll):
+def scoring_choice_generator(roll, POSSIBLE_CHOICES_COUNTS):
     """
     Calculates possible scoring choices for a roll
 
@@ -441,3 +438,13 @@ def scoring_choice_generator(roll):
     if len(choices) == 0: # farkle
         choices.append(tuple([]))
     return choices
+
+def partial_func(s, gamma, V, mdp, a):
+    return sum([p * (mdp.R(s, a) + gamma * V[s1]) for (p, s1) in mdp.T(s, a)])
+
+def partial_func2(s, a, gamma, V, mdp, x):
+    p, s1 = x
+    return p * (mdp.R(s, a) + gamma * V[s1])
+
+def partial_sum(summand, idx):
+    return sum(summand[idx[0]:idx[1]])
